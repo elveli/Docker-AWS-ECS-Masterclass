@@ -4,6 +4,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "vpc_cidr_block" {
+  description = "The CIDR block for the VPC"
+  type        = string
+  default     = "10.42.0.0/16"
+}
+
 variable "app_name" {
   description = "The name of the application. Used to tag and name resources."
   type        = string
