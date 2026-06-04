@@ -62,6 +62,39 @@ chmod +x deploy.sh
 # Run the complete deployment to AWS
 ./deploy.sh
 ```
+
+#### Seeing Your Live ECS Application & Logs (AWS vs Local)
+
+It's important to remember that `deploy.sh` pushes and runs your container in the **AWS Cloud**, not on your local laptop! 
+- Running `docker logs my-app-container` will fail locally because the container isn't running on your machine.
+- Your cluster **was** created! You can see it by logging into the **AWS Management Console**, searching for **ECS**, and ensuring your region is set to `us-east-1` (N. Virginia). Look for the cluster named `docker-masterclass-app-cluster`.
+
+To view the live application logs streaming from your AWS Fargate container, use CloudWatch via the AWS CLI:
+```bash
+# Stream the production container logs from AWS
+aws logs tail /ecs/docker-masterclass-app --follow --region us-east-1
+```
+
+> **💡 Understanding the Logs:** If you see logs containing `signal 3 (SIGQUIT) received, shutting down`, don't panic! This is a sign of a **successful rolling deployment**. AWS ECS starts your *new* container first, waits for it to become healthy, and then gracefully shuts down the *old* container by sending a `SIGQUIT` signal. It means your zero-downtime deployment worked!
+
+#### Accessing Your Application (cURL)
+
+Because this is a simple showcase, we did not provision an expensive Application Load Balancer (ALB). Instead, your Fargate task is running in a public subnet and is assigned a direct **Public IP**.
+
+To find the IP and view it in your browser or via `curl`:
+1. Go to the **AWS Management Console** -> **ECS**.
+2. Click on your cluster (`docker-masterclass-app-cluster`).
+3. Click on the **Tasks** tab and click on the running task ID.
+4. In the **Configuration** section, look for the **Public IP**.
+5. From your laptop, test the connection via port 3000:
+   ```bash
+   curl http://<YOUR_PUBLIC_IP>:3000
+   ```
+   *(Or simply paste `http://<YOUR_PUBLIC_IP>:3000` into your web browser!)*
+
+### Terraform Usage:
+
+1. **Navigate to the Terraform directory:**
    ```bash
    cd terraform
    ```
@@ -99,6 +132,16 @@ Alpine Linux is a security-oriented, lightweight Linux distribution built on **m
 - **No glibc (The C Standard Library):** Because Alpine uses `musl` libc instead of standard GNU `glibc`, some natively compiled language libraries (like complex Python C-extensions or Node.js native modules built via `node-gyp`) might fail to compile or run out of the box. 
 - **The Alternative:** If your app relies heavily on `glibc` and struggles with Alpine, the best un-bloating alternative is a Debian "slim" variant (e.g., `FROM python:3.11-slim`), which balances smaller size with broad C-library compatibility.
 
+### Inspecting Image Layers with `dive`
+To visually verify that your Alpine/slim images are un-bloated, use the excellent open-source tool **`dive`**. It shows a layer-by-layer breakdown of your Docker image and highlights wasted space (e.g., files added in one layer but deleted in the next).
+```bash
+# Install dive on macOS via Homebrew
+brew install dive
+
+# Run dive against your image tag
+dive my-app:latest
+```
+
 ## Docker CLI Cheat Sheet
 
 Here are useful Docker CLI commands to build, run, and manage your containerized applications:
@@ -116,20 +159,40 @@ Here are useful Docker CLI commands to build, run, and manage your containerized
 - **List images**: `docker images`
 - **Remove an image**: `docker rmi my-app:latest`
 
-## Troubleshooting Docker
+## Troubleshooting Docker (Local vs AWS Fargate)
 
-When things go wrong, use these commands to diagnose the issue:
+When things go wrong, use these commands to diagnose the issue. 
 
-- **Check container logs**:
+**Crucial Distinction:** You CANNOT run local `docker` commands against an AWS Fargate container. Fargate abstracts away the underlying servers, so there is no Docker daemon you can connect to from your laptop. Instead, AWS provides equivalent CLI commands.
+
+### 1. Checking Logs
+- **Local:**
   ```bash
-  docker logs -f my-app-container
-  # Use --tail to limit output: docker logs --tail 100 -f my-app-container
+  docker logs --tail 100 -f my-app-container
   ```
-- **Execute into a running container**:
+- **AWS Fargate (via CloudWatch):**
+  ```bash
+  aws logs tail /ecs/docker-masterclass-app --follow --region us-east-1
+  ```
+
+### 2. Getting Shell Access
+- **Local:**
   ```bash
   docker exec -it my-app-container /bin/sh
-  # or /bin/bash depending on your container's shell
   ```
+- **AWS Fargate (via ECS Exec):**
+  *(Note: Requires the task role to have SSM permissions and ECS Exec to be explicitly enabled on the service)*
+  ```bash
+  aws ecs execute-command \
+    --cluster docker-masterclass-app-cluster \
+    --task <TASK_ID> \
+    --container docker-masterclass-app \
+    --interactive \
+    --command "/bin/sh"
+  ```
+
+### 3. Local-Only System / Resource Commands
+These commands only work locally to manage your local Docker engine:
 - **Inspect container configuration (find IP, OOM kills, etc.)**:
   ```bash
   docker inspect my-app-container

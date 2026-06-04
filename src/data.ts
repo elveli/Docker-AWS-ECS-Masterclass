@@ -86,6 +86,20 @@ RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 CMD ["python", "main.py"]`,
         language: 'dockerfile'
+      },
+      {
+        id: 'dive-tool',
+        title: 'Inspecting Layers with Dive',
+        content: '`dive` is an excellent open-source CLI tool for exploring a Docker image, examining layer contents, and discovering ways to shrink the size of your Docker image. It analyzes your image and provides a detailed breakdown of wasted space such as files modified, duplicated, or removed across multiple layers.',
+        code: `# Install dive (e.g., macOS via Homebrew)
+brew install dive
+
+# Run dive against your built image to interactively analyze bloat
+dive my-microservice:latest
+
+# Useful for CI/CD pipelines: automatically fail the build if wasted space > threshold
+CI=true dive my-microservice:latest`,
+        language: 'bash'
       }
     ]
   },
@@ -146,8 +160,8 @@ docker system prune -a --volumes -f`,
       },
       {
         id: 'diagnostics',
-        title: 'Diagnostics & Resource Exhaustion',
-        content: 'If an ECS Fargate task dies immediately or locally your container crashes silently, you need to quickly diagnose if it is a memory/CPU issue or a runtime code crash.',
+        title: 'Local Diagnostics & Resource Exhaustion',
+        content: 'If an ECS Fargate task dies immediately or locally your container crashes silently, you need to quickly diagnose if it is a memory/CPU issue or a runtime code crash. (Note: These commands apply to LOCAL docker environments. For AWS Fargate, see the next section).',
         code: `# Monitor real-time CPU, Memory, and Network I/O
 docker stats
 
@@ -159,6 +173,22 @@ docker inspect <container_id> | grep -i oom
 
 # Stream daemon-level events to debug network/startup failures
 docker events`,
+        language: 'bash'
+      },
+      {
+        id: 'fargate-diagnostics',
+        title: 'AWS Fargate Diagnostics (Remote)',
+        content: 'Because AWS Fargate is a serverless container environment, you do not have access to the underlying Docker daemon. You cannot run `docker exec` or `docker stats` against it from your laptop. Instead, you use the AWS CLI, CloudWatch (for logs and metrics), and ECS Exec (for shell access).',
+        code: `# Equivalent to 'docker logs' (using CloudWatch)
+aws logs tail /ecs/docker-masterclass-app --follow --region us-east-1
+
+# Equivalent to 'docker exec' (Requires ECS Exec enabled on your task)
+aws ecs execute-command \\
+  --cluster docker-masterclass-app-cluster \\
+  --task <TASK_ID> \\
+  --container docker-masterclass-app \\
+  --interactive \\
+  --command "/bin/sh"`,
         language: 'bash'
       }
     ]
