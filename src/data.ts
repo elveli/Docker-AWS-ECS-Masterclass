@@ -190,17 +190,20 @@ docker system prune -a --volumes -f`,
         id: 'diagnostics',
         title: 'Local Diagnostics & Resource Exhaustion',
         content: 'If an ECS Fargate task dies immediately or locally your container crashes silently, you need to quickly diagnose if it is a memory/CPU issue or a runtime code crash. (Note: These commands apply to LOCAL docker environments. For AWS Fargate, see the next section).',
-        code: `# Monitor real-time CPU, Memory, and Network I/O
-docker stats
+        code: `# 1. List containers to find the correct NAME or ID (and ensure it's 'Up')
+docker ps
 
-# Tail the last 100 lines of logs with timestamps to diagnose crashes
+# 2. Get a shell inside a RUNNING container. (Requires Container Name/ID, NOT image name!)
+docker exec -it <container_name_or_id> /bin/sh
+
+# 3. View the logs of a crashed/stopped container
 docker logs --tail 100 -f -t <container_id>
 
-# Check if container died from Out-of-Memory (Look for OOMKilled: true)
-docker inspect <container_id> | grep -i oom
+# 4. Monitor real-time CPU, Memory, and Network I/O
+docker stats
 
-# Stream daemon-level events to debug network/startup failures
-docker events`,
+# 5. Check if a crashed container died from Out-of-Memory (Look for OOMKilled: true)
+docker inspect <container_id> | grep -i oom`,
         language: 'bash'
       },
       {

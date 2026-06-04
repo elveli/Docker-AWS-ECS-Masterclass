@@ -241,6 +241,8 @@ When things go wrong, use these commands to diagnose the issue.
 ### 2. Getting Shell Access
 - **Local:**
   ```bash
+  # Note: The container must be RUNNING (Status 'Up' in docker ps).
+  # Pass the CONTAINER NAME or ID (not the image name!).
   docker exec -it my-app-container /bin/sh
   ```
 - **AWS Fargate (via ECS Exec):**
