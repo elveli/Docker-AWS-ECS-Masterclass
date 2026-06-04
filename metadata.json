@@ -1,0 +1,6 @@
+{
+  "name": "Docker & AWS ECS Masterclass",
+  "description": "Interactive showcase and tutorial for advanced Docker optimization and AWS Fargate deployment.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
