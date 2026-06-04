@@ -165,14 +165,19 @@ docker scout cves my-app:latest
 
 Here are useful Docker CLI commands to build, run, and manage your containerized applications:
 
-### Build & Run
+### Build, Run & Manage Containers
 - **Build an image**: `docker build -t my-app .`
 - **Run interactively**: `docker run -it --rm -p 3000:3000 my-app`
 - **Run in detached mode (background)**: `docker run -d --name my-app-container -p 3000:3000 my-app`
 - **List running containers**: `docker ps`
 - **List all containers**: `docker ps -a`
+- **Stop a container**: `docker stop my-app-container`
+- **Remove a stopped container**: `docker rm my-app-container`
+- **Copy files to/from a container**: `docker cp ./local-file.txt my-app-container:/app/file.txt`
+- **View container port mappings**: `docker port my-app-container`
 
 ### Image Management
+- **Pull an image from a registry**: `docker pull nginx:alpine`
 - **Tag an image**: `docker tag my-app:latest aws-account-id.dkr.ecr.region.amazonaws.com/my-app:latest`
 - **Push an image**: `docker push aws-account-id.dkr.ecr.region.amazonaws.com/my-app:latest`
 - **List images**: `docker images`
