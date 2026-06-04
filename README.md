@@ -45,6 +45,9 @@ To link Terraform and Docker together in a single action, you can use the provid
 
 #### Using `deploy.sh`
 This script glues the process together:
+
+**Prerequisite:** Ensure **Docker Desktop** (or your preferred Docker engine like OrbStack or Colima) is currently running on your local machine. If the Docker daemon isn't running, the script will fail when trying to build the image (e.g., `failed to connect to the docker API... connection refused`).
+
 1. It applies the Terraform configuration to provision all AWS resources.
 2. It parses the Terraform outputs to find the ECR Registry URL.
 3. It authenticates your local Docker CLI securely with AWS.
