@@ -90,15 +90,17 @@ CMD ["python", "main.py"]`,
       {
         id: 'dive-tool',
         title: 'Inspecting Layers with Dive',
-        content: '`dive` is an excellent open-source CLI tool for exploring a Docker image, examining layer contents, and discovering ways to shrink the size of your Docker image. It analyzes your image and provides a detailed breakdown of wasted space such as files modified, duplicated, or removed across multiple layers.',
+        content: '`dive` is an excellent open-source CLI tool for exploring a Docker image, examining layer contents, and discovering ways to shrink the size of your Docker image. Important: `dive` analyzes the image layers on your local machine, not a running container in AWS. You should ideally run this locally before pushing to ECR.',
         code: `# Install dive (e.g., macOS via Homebrew)
 brew install dive
 
-# Run dive against your built image to interactively analyze bloat
+# Run dive against your locally built image
 dive my-microservice:latest
 
-# Useful for CI/CD pipelines: automatically fail the build if wasted space > threshold
-CI=true dive my-microservice:latest`,
+# To analyze an image already in AWS ECR, pull it to your laptop first:
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
+docker pull <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/my-microservice:latest
+dive <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/my-microservice:latest`,
         language: 'bash'
       }
     ]
@@ -178,7 +180,7 @@ docker events`,
       {
         id: 'fargate-diagnostics',
         title: 'AWS Fargate Diagnostics (Remote)',
-        content: 'Because AWS Fargate is a serverless container environment, you do not have access to the underlying Docker daemon. You cannot run `docker exec` or `docker stats` against it from your laptop. Instead, you use the AWS CLI, CloudWatch (for logs and metrics), and ECS Exec (for shell access).',
+        content: 'Because AWS Fargate is a serverless container environment, you do not have access to the underlying Docker daemon. You cannot run `docker exec`, `docker stats`, `docker inspect`, or `docker system prune` against it from your laptop. Instead, you use the AWS CLI, CloudWatch (for logs, CPU/Memory metrics), the AWS Console (for IPs and OOM Stopped Reasons) and ECS Exec (for shell access).',
         code: `# Equivalent to 'docker logs' (using CloudWatch)
 aws logs tail /ecs/docker-masterclass-app --follow --region us-east-1
 

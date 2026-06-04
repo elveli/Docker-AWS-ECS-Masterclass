@@ -134,12 +134,20 @@ Alpine Linux is a security-oriented, lightweight Linux distribution built on **m
 
 ### Inspecting Image Layers with `dive`
 To visually verify that your Alpine/slim images are un-bloated, use the excellent open-source tool **`dive`**. It shows a layer-by-layer breakdown of your Docker image and highlights wasted space (e.g., files added in one layer but deleted in the next).
+
+> **Important:** `dive` analyzes the image layers on your local machine, not a running container in AWS. You should ideally run this locally before pushing to ECR.
+
 ```bash
 # Install dive on macOS via Homebrew
 brew install dive
 
-# Run dive against your image tag
+# Run dive against your locally built image tag
 dive my-app:latest
+
+# To run it against an image already in AWS ECR, pull it first:
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <YOUR_ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com
+docker pull <YOUR_ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+dive <YOUR_ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
 ```
 
 ## Docker CLI Cheat Sheet
@@ -191,21 +199,15 @@ When things go wrong, use these commands to diagnose the issue.
     --command "/bin/sh"
   ```
 
-### 3. Local-Only System / Resource Commands
-These commands only work locally to manage your local Docker engine:
-- **Inspect container configuration (find IP, OOM kills, etc.)**:
-  ```bash
-  docker inspect my-app-container
-  ```
-- **Keep disk usage in check (System Prune)**:
-  ```bash
-  # Remove stopped containers, dangling images, and unused networks
-  docker system prune
-  
-  # WARNING: Remove EVERYTHING unused (including downloaded base images & volumes)
-  docker system prune -a --volumes -f
-  ```
-- **Monitor resource usage**:
-  ```bash
-  docker stats
-  ```
+### 3. System / Resource Commands (Local vs AWS)
+**Crucial Concept:** Fargate manages the underlying compute infrastructure. You do not manage the disk or the Docker daemon on Fargate. 
+
+- **Inspect Container (IP, OOM Kills, etc):**
+  - **Local:** `docker inspect my-app-container`
+  - **AWS Fargate:** Use the AWS Management Console (ECS service -> Tasks tab -> Task Details) to view the Public/Private IPs. For OOM kills, check the "Stopped Reason" in the Task details. You do not use `docker inspect`.
+- **System Prune (Storage Cleanup):**
+  - **Local:** `docker system prune -a --volumes` is essential to reclaim local disk space.
+  - **AWS Fargate:** Not applicable! AWS automatically scales and throws away the underlying EC2 micro-VMs when your task finishes. You literally cannot run out of disk space on the host daemon because you don't manage the host.
+- **Monitor Resource Usage:**
+  - **Local:** `docker stats` (streams CPU/Memory usage live)
+  - **AWS Fargate:** Go to the AWS Management Console -> CloudWatch -> Metrics, or view the "Metrics" tab directly inside your ECS Service dashboard.
