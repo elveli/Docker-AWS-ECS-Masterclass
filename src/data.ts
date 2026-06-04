@@ -102,6 +102,17 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 docker pull <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/my-microservice:latest
 dive <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/my-microservice:latest`,
         language: 'bash'
+      },
+      {
+        id: 'scout-tool',
+        title: 'Vulnerability Scanning (Docker Scout)',
+        content: 'Un-bloating your images by using Alpine or slim base images drastically reduces your attack surface. You can verify this by scanning your local images for vulnerabilities (CVEs) using `docker scout` (which comes pre-installed with Docker Desktop).',
+        code: `# Get a quick summary of vulnerabilities in your image
+docker scout quickview my-microservice:latest
+
+# Get a detailed list of all discovered CVEs
+docker scout cves my-microservice:latest`,
+        language: 'bash'
       }
     ]
   },

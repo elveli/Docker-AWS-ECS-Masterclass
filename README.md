@@ -150,6 +150,17 @@ docker pull <YOUR_ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
 dive <YOUR_ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
 ```
 
+### Vulnerability Scanning with `docker scout`
+Running un-bloated base images drastically reduces your container's attack surface. To verify the security of your image, use **Docker Scout** (built directly into Docker Desktop) to scan for Common Vulnerabilities and Exposures (CVEs).
+
+```bash
+# Get a quick summary of vulnerabilities in your image
+docker scout quickview my-app:latest
+
+# Get a detailed list of all discovered CVEs
+docker scout cves my-app:latest
+```
+
 ## Docker CLI Cheat Sheet
 
 Here are useful Docker CLI commands to build, run, and manage your containerized applications:
