@@ -37,9 +37,28 @@ A complete Infrastructure as Code (IaC) setup using **Terraform** is provided in
 - **Container Registry**: Amazon ECR repository for storing slimmed-down Docker images.
 - **Compute**: Amazon ECS Cluster and a Serverless Fargate ECS Service.
 
-### Terraform Usage:
+### AWS Terraform & Docker Deployment
 
-1. **Navigate to the Terraform directory:**
+To answer your initial question: **No, the Terraform code does not automatically build and push the Docker image by itself.** Terraform is excellent at provisioning the infrastructure (the ECR registry, VPC, ECS Cluster), but container builds and pushes are typically handled by Continuous Integration (CI) tools or deployment scripts.
+
+To link Terraform and Docker together in a single action, you can use the provided `deploy.sh` script.
+
+#### Using `deploy.sh`
+This script glues the process together:
+1. It applies the Terraform configuration to provision all AWS resources.
+2. It parses the Terraform outputs to find the ECR Registry URL.
+3. It authenticates your local Docker CLI securely with AWS.
+4. It builds a multi-stage `Dockerfile` and pushes it to ECR.
+5. It tells AWS ECS to gracefully update and rollout the new Docker image.
+
+To run it:
+```bash
+# Make the script executable
+chmod +x deploy.sh
+
+# Run the complete deployment to AWS
+./deploy.sh
+```
    ```bash
    cd terraform
    ```

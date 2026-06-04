@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+.git
+terraform
+.gitignore
+README.md
