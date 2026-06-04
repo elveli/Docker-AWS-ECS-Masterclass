@@ -227,3 +227,6 @@ When things go wrong, use these commands to diagnose the issue.
 - **Monitor Resource Usage:**
   - **Local:** `docker stats` (streams CPU/Memory usage live)
   - **AWS Fargate:** Go to the AWS Management Console -> CloudWatch -> Metrics, or view the "Metrics" tab directly inside your ECS Service dashboard.
+- **View Port Mappings:**
+  - **Local:** `docker port my-app-container` (shows local host port to container port mappings).
+  - **AWS Fargate:** Not applicable in the same way. Tasks run in `awsvpc` network mode, meaning each task has its own IP. The container port is directly exposed on that IP. You must check the **Security Group** attached to the ECS Service (via the AWS Console) to ensure inbound rules allow traffic to that port.

@@ -191,7 +191,7 @@ docker events`,
       {
         id: 'fargate-diagnostics',
         title: 'AWS Fargate Diagnostics (Remote)',
-        content: 'Because AWS Fargate is a serverless container environment, you do not have access to the underlying Docker daemon. You cannot run `docker exec`, `docker stats`, `docker inspect`, or `docker system prune` against it from your laptop. Instead, you use the AWS CLI, CloudWatch (for logs, CPU/Memory metrics), the AWS Console (for IPs and OOM Stopped Reasons) and ECS Exec (for shell access).',
+        content: 'Because AWS Fargate is a serverless container environment, you do not have access to the underlying Docker daemon. You cannot run `docker exec`, `docker stats`, `docker inspect`, `docker port`, or `docker system prune` against it from your laptop. Instead, you use the AWS CLI, CloudWatch (for logs, CPU/Memory metrics), the AWS Console (for IPs, Security Groups, and OOM Stopped Reasons) and ECS Exec (for shell access).',
         code: `# Equivalent to 'docker logs' (using CloudWatch)
 aws logs tail /ecs/docker-masterclass-app --follow --region us-east-1
 
