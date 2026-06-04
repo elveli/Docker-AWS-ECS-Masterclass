@@ -80,6 +80,22 @@ chmod +x deploy.sh
 
 _Note: You will need AWS credentials configured (e.g., via `aws configure` or environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) prior to running Terraform._
 
+## The Power of Alpine Linux (Un-bloating Images)
+
+Throughout this project's Dockerfile (and commonly in production Docker environments), you will see the `-alpine` suffix on base images, such as `FROM nginx:alpine` or `FROM node:20-alpine`.
+
+### What is Alpine?
+Alpine Linux is a security-oriented, lightweight Linux distribution built on **musl libc** and **busybox** instead of standard GNU tools.
+
+### Why use it for Docker?
+1. **Drastically Smaller Image Sizes:** A standard `nginx:latest` image is roughly 180MB. The `nginx:alpine` image is merely **~40MB**. This leads to faster image build times, quicker container pull times, faster AWS Fargate cold starts, and reduced storage costs on ECR.
+2. **Reduced Attack Surface:** By stripping out common OS utilities (like `bash`, standard `glibc`, and compilers), there is significantly less surface area for malicious actors and fewer CVEs (Common Vulnerabilities and Exposures) to patch.
+
+### Important "Gotchas" to Remember
+- **Shell differences:** Since Alpine uses `ash` (part of busybox) instead of `bash`, when exec'ing into a container, you use `docker exec -it container_id /bin/sh`.
+- **No glibc (The C Standard Library):** Because Alpine uses `musl` libc instead of standard GNU `glibc`, some natively compiled language libraries (like complex Python C-extensions or Node.js native modules built via `node-gyp`) might fail to compile or run out of the box. 
+- **The Alternative:** If your app relies heavily on `glibc` and struggles with Alpine, the best un-bloating alternative is a Debian "slim" variant (e.g., `FROM python:3.11-slim`), which balances smaller size with broad C-library compatibility.
+
 ## Docker CLI Cheat Sheet
 
 Here are useful Docker CLI commands to build, run, and manage your containerized applications:
