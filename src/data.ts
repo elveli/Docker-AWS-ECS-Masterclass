@@ -38,6 +38,21 @@ docker inspect my-redis | jq '.[0].NetworkSettings.IPAddress'`,
     icon: 'layers',
     sections: [
       {
+        id: 'local-build',
+        title: 'Building Multi-Stage Images Locally',
+        content: 'Before pushing an optimized multi-stage image (like our Nginx/React app) or analyzing it with dive, you should build and run it locally on your laptop to verify everything works.',
+        code: `# 1. Build the image defined in the Dockerfile
+# (This executes both the node build stage and the Nginx setup stage)
+docker build -t my-microservice:latest .
+
+# 2. Run the newly built image locally
+# Matches port 3000 on your laptop to port 3000 inside the container
+docker run -d --name my-local-service -p 3000:3000 my-microservice:latest
+
+# 3. Open http://localhost:3000 in your browser to verify it works!`,
+        language: 'bash'
+      },
+      {
         id: 'node-slim',
         title: 'Node.js Production Microservice',
         content: 'To un-bloat Node.js images, use a multi-stage build. We compile typescript in the builder stage, then copy only the compiled /dist folder and install only production dependencies using `npm ci --only=production`. Crucially, we switch to a non-root `node` user for security.',

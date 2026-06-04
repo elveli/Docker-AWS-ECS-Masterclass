@@ -27,6 +27,29 @@ This applet runs entirely in your browser using React and Vite.
    npm run build
    ```
 
+## Building the Docker Image Locally
+
+To test the multi-stage Nginx Docker build locally on your laptop (and to be able to run tools like `dive` or `docker scout` against it before deploying to AWS):
+
+1. **Build the Docker image** (this will execute both the Node.js build stage and the Nginx serving stage):
+   ```bash
+   docker build -t my-app:latest .
+   ```
+
+2. **Run the container locally:**
+   ```bash
+   # Matches port 3000 on your laptop to port 3000 inside the Nginx container
+   docker run -d --name my-local-app -p 3000:3000 my-app:latest
+   ```
+
+3. **Verify it works:**
+   Open `http://localhost:3000` in your web browser.
+
+4. **Analyze it with `dive`:**
+   ```bash
+   dive my-app:latest
+   ```
+
 ## AWS Terraform Deployment
 
 A complete Infrastructure as Code (IaC) setup using **Terraform** is provided in the `/terraform` directory. This provisions a production-ready AWS environment to deploy the containerized microservices discussed in the tutorial.
