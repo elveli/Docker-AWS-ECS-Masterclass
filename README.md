@@ -114,6 +114,22 @@ To find the IP and view it in your browser or via `curl`:
    terraform apply
    ```
 
+5. **Tearing Down (Destroying) the Infrastructure:**
+   To avoid AWS charges, remember to destroy your resources when you are done!
+   ```bash
+   terraform destroy
+   ```
+   > **💡 ECR Destroy Error:** If `terraform destroy` fails with the error `ECR Repository (docker-masterclass-app-repo) not empty`:
+   > 
+   > 1. We just added `force_delete = true` to `main.tf`, but you must run `terraform apply` first to update the Terraform state.
+   > 2. Then, run `terraform destroy` again.
+   > 
+   > *Alternatively, you can forcefully delete the repository using the AWS CLI, and then re-run terraform destroy:*
+   > ```bash
+   > aws ecr delete-repository --repository-name docker-masterclass-app-repo --force --region us-east-1
+   > terraform destroy
+   > ```
+
 _Note: You will need AWS credentials configured (e.g., via `aws configure` or environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) prior to running Terraform._
 
 ## The Power of Alpine Linux (Un-bloating Images)
